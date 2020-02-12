@@ -29,11 +29,9 @@ class MiniMediaPlayerTts extends LitElement {
         placeholder=${this.label}...
         @click=${e => e.stopPropagation()}>
       </paper-input>
-      <div>
-        <mwc-button class='mmp-tts__button' @click=${this.handleTts}>
-          SEND
-        </mwc-button>
-      </div>
+      <mmp-button class='mmp-tts__button' @click=${this.handleTts}>
+        <span>SEND</span>
+      </mmp-button>
     `;
   }
 
@@ -56,6 +54,8 @@ class MiniMediaPlayerTts extends LitElement {
         volume: config.volume || 0.5,
         message,
       });
+    else if (config.platform === 'webos')
+      this.hass.callService('notify', opts.entity_id.split('.').slice(-1)[0], { message });
     else if (config.platform === 'ga')
       this.hass.callService('notify', 'ga_broadcast', { message });
     else
@@ -89,12 +89,13 @@ class MiniMediaPlayerTts extends LitElement {
       }
       .mmp-tts__button {
         margin: 0;
-        padding: .4em;
+        height: 30px;
+        padding: 0 .4em;
       }
       paper-input {
         opacity: .75;
-        --paper-input-container-color: var(--primary-text-color);
-        --paper-input-container-focus-color: var(--primary-text-color);
+        --paper-input-container-color: var(--mmp-text-color);
+        --paper-input-container-focus-color: var(--mmp-text-color);
         --paper-input-container: {
           padding: 0;
         };

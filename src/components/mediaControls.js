@@ -8,6 +8,7 @@ class MiniMediaPlayerMediaControls extends LitElement {
     return {
       player: {},
       config: {},
+      break: Boolean,
     };
   }
 
@@ -26,7 +27,7 @@ class MiniMediaPlayerMediaControls extends LitElement {
   render() {
     const { hide } = this.config;
     return html`
-      ${!hide.volume ? this.renderVolControls(this.player.muted) : ''}
+      ${!hide.volume ? this.renderVolControls(this.player.muted) : html``}
       ${this.showShuffle ? html`
         <div class='flex mmp-media-controls__shuffle'>
           <paper-icon-button
@@ -36,23 +37,20 @@ class MiniMediaPlayerMediaControls extends LitElement {
             ?color=${this.player.shuffle}>
           </paper-icon-button>
         </div>
-      ` : ''}
+      ` : html``}
       ${!hide.controls ? html`
-        <div class='flex mmp-media-controls__media' ?flow=${this.config.flow}>
+        <div class='flex mmp-media-controls__media' ?flow=${this.config.flow || this.break}>
           <paper-icon-button
             @click=${e => this.player.prev(e)}
             .icon=${ICON.PREV}>
           </paper-icon-button>
-          <paper-icon-button
-            @click=${e => this.player.playPause(e)}
-            .icon=${ICON.PLAY[this.player.isPlaying]}>
-          </paper-icon-button>
+          ${this.renderPlayButtons()}
           <paper-icon-button
             @click=${e => this.player.next(e)}
             .icon=${ICON.NEXT}>
           </paper-icon-button>
         </div>
-      ` : ''}
+      ` : html``}
     `;
   }
 
@@ -67,7 +65,7 @@ class MiniMediaPlayerMediaControls extends LitElement {
     return html`
       <div class='mmp-media-controls__volume --slider flex'>
         ${this.renderMuteButton(muted)}
-        <ha-paper-slider
+        <ha-slider
           @change=${this.handleVolumeChange}
           @click=${e => e.stopPropagation()}
           ?disabled=${muted}
@@ -75,7 +73,7 @@ class MiniMediaPlayerMediaControls extends LitElement {
           value=${this.player.vol * 100}
           dir=${'ltr'}
           ignore-bar-touch pin>
-        </ha-paper-slider>
+        </ha-slider>
       </div>`;
   }
 
@@ -98,6 +96,7 @@ class MiniMediaPlayerMediaControls extends LitElement {
     if (this.config.hide.mute) return;
     switch (this.config.replace_mute) {
       case 'play':
+      case 'play_pause':
         return html`
           <paper-icon-button
             @click=${e => this.player.playPause(e)}
@@ -108,7 +107,14 @@ class MiniMediaPlayerMediaControls extends LitElement {
         return html`
           <paper-icon-button
             @click=${e => this.player.stop(e)}
-            .icon=${ICON.STOP}>
+            .icon=${ICON.STOP.true}>
+          </paper-icon-button>
+        `;
+      case 'play_stop':
+        return html`
+          <paper-icon-button
+            @click=${e => this.player.playStop(e)}
+            .icon=${ICON.STOP[this.player.isPlaying]}>
           </paper-icon-button>
         `;
       case 'next':
@@ -129,6 +135,28 @@ class MiniMediaPlayerMediaControls extends LitElement {
     }
   }
 
+  renderPlayButtons() {
+    const { hide } = this.config;
+    return html`
+      ${!hide.play_pause ? html`
+        <paper-icon-button
+          @click=${e => this.player.playPause(e)}
+          .icon=${ICON.PLAY[this.player.isPlaying]}>
+        </paper-icon-button>
+      ` : html``}
+      ${!hide.play_stop ? html`
+        <paper-icon-button
+          @click=${e => this.handleStop(e)}
+          .icon=${hide.play_pause ? ICON.STOP[this.player.isPlaying] : ICON.STOP.true}>
+        </paper-icon-button>
+      ` : html``}
+    `;
+  }
+
+  handleStop(e) {
+    return this.config.hide.play_pause ? this.player.playStop(e) : this.player.stop(e);
+  }
+
   handleVolumeChange(ev) {
     const vol = parseFloat(ev.target.value) / 100;
     this.player.setVolume(ev, vol);
@@ -141,35 +169,36 @@ class MiniMediaPlayerMediaControls extends LitElement {
         :host {
           display: flex;
           width: 100%;
+          justify-content: space-between;
         }
         .flex {
           display: flex;
           flex: 1;
           justify-content: space-between;
         }
-        ha-paper-slider {
+        ha-slider {
           max-width: none;
           min-width: 100px;
           width: 100%;
         }
         paper-icon-button {
-          min-width: 40px;
+          min-width: var(--mmp-unit);
         }
         .mmp-media-controls__volume {
           flex: 100;
-          max-height: 40px;
+          max-height: var(--mmp-unit);
         }
         .mmp-media-controls__volume.--buttons {
           justify-content: left;
         }
         .mmp-media-controls__media {
-          direction: ltr;
-          max-width: calc(40px * 3);
           margin-right: 0;
           margin-left: auto;
+          justify-content: inherit;
         }
         .mmp-media-controls__media[flow] {
           max-width: none;
+          justify-content: space-between;
         }
         .mmp-media-controls__shuffle {
           flex: 3;

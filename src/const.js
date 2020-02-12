@@ -5,6 +5,10 @@ const DEFAULT_HIDE = {
   icon_state: true,
   sound_mode: true,
   runtime: true,
+  volume: false,
+  controls: false,
+  play_pause: false,
+  play_stop: true,
 };
 const ICON = {
   DEFAULT: 'mdi:cast',
@@ -24,7 +28,10 @@ const ICON = {
   PREV: 'mdi:skip-previous',
   SEND: 'mdi:send',
   SHUFFLE: 'mdi:shuffle',
-  STOP: 'mdi:stop',
+  STOP: {
+    true: 'mdi:stop',
+    false: 'mdi:play',
+  },
   VOL_DOWN: 'mdi:volume-minus',
   VOL_UP: 'mdi:volume-plus',
 };

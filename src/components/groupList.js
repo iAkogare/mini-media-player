@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit-element';
 
 import './groupItem';
+import './button';
 
 class MiniMediaPlayerGroupList extends LitElement {
   static get properties() {
@@ -23,41 +24,53 @@ class MiniMediaPlayerGroupList extends LitElement {
     return this.player.isMaster;
   }
 
+  get isGrouped() {
+    return this.player.isGrouped;
+  }
+
   handleGroupChange(ev) {
     const { entity, checked } = ev.detail;
     this.player.handleGroupChange(ev, entity, checked);
   }
 
-  render({ group, master, isMaster } = this) {
-    return this.visible ? html`
-      <div class='mmp-group-list' ?visible=${this.visible}>
+  render() {
+    if (!this.visible) return html``;
+    const { group, isMaster, isGrouped } = this;
+    const { id } = this.player;
+    return html`
+      <div class='mmp-group-list'>
         <span class='mmp-group-list__title'>Group speakers</span>
-        ${this.entities.map(item => html`
-          <mmp-group-item
-            @change=${this.handleGroupChange}
-            .item=${item}
-            .checked=${item.entity_id === this.player.id || group.includes(item.entity_id)}
-            .disabled=${item.entity_id === this.player.id || master !== this.player.id}
-            .master=${item.entity_id === master}
-          />`)}
+        ${this.entities.map(item => this.renderItem(item, id))}
         <div class='mmp-group-list__buttons'>
-          <mwc-button
-            class='mmp-group-list__button'
-            raised
-            ?disabled=${group.length < 2}
-            @click='${e => this.player.handleGroupChange(e, isMaster ? group : this.player.entity_id, false)}'>
-            ${isMaster ? html`Ungroup` : html`Leave`}
-          </mwc-button>
-          <mwc-button
-            class='mmp-group-list__button'
-            raised
-            ?disabled=${!isMaster}
-            @click='${e => this.player.handleGroupChange(e, this.entities.map(item => item.entity_id), true)}'>
-            Group all
-          </mwc-button>
+          <mmp-button raised ?disabled=${!isGrouped}
+            @click=${e => this.player.handleGroupChange(e, id, false)}>
+            <span>Leave</span>
+          </mmp-button>
+          ${isGrouped && isMaster ? html`
+            <mmp-button raised
+              @click=${e => this.player.handleGroupChange(e, group, false)}>
+              <span>Ungroup</span>
+            </mmp-button>
+          ` : html``}
+          <mmp-button raised ?disabled=${!isMaster}
+            @click=${e => this.player.handleGroupChange(e, this.entities.map(item => item.entity_id), true)}>
+            <span>Group all</span>
+          </mmp-button>
         </div>
       </div>
-    ` : html``;
+    `;
+  }
+
+  renderItem(item, id) {
+    const itemId = item.entity_id;
+    return html`
+      <mmp-group-item
+        @change=${this.handleGroupChange}
+        .item=${item}
+        .checked=${itemId === id || this.group.includes(itemId)}
+        .disabled=${itemId === id || !this.isMaster}
+        .master=${itemId === this.master}
+      />`;
   }
 
   static get styles() {
@@ -66,6 +79,7 @@ class MiniMediaPlayerGroupList extends LitElement {
         display: flex;
         flex-direction: column;
         margin-left: 8px;
+        margin-bottom: 8px;
       }
       .mmp-group-list__title {
         font-weight: 500;
@@ -76,7 +90,7 @@ class MiniMediaPlayerGroupList extends LitElement {
       .mmp-group-list__buttons {
         display: flex;
       }
-      .mmp-group-list__button {
+      mmp-button {
         margin: 8px 8px 0 0;
         min-width: 0;
         text-transform: uppercase;

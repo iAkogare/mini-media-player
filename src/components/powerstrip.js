@@ -20,6 +20,10 @@ class MiniMediaPlayerPowerstrip extends LitElement {
     };
   }
 
+  get icon() {
+    return this.config.speaker_group.icon || ICON.GROUP;
+  }
+
   get showGroupButton() {
     return this.config.speaker_group.entities;
   }
@@ -33,11 +37,15 @@ class MiniMediaPlayerPowerstrip extends LitElement {
   }
 
   get sourceSize() {
-    return (this.config.source === 'icon' || this.config.collapse || this.idle);
+    return (this.config.source === 'icon' || this.hasControls || this.idle);
   }
 
   get soundSize() {
-    return (this.config.sound_mode === 'icon' || this.config.collapse || this.idle);
+    return (this.config.sound_mode === 'icon' || this.hasControls || this.idle);
+  }
+
+  get hasControls() {
+    return this.player.active && (this.config.hide.controls !== this.config.hide.volume);
   }
 
   get hasSource() {
@@ -58,7 +66,7 @@ class MiniMediaPlayerPowerstrip extends LitElement {
 
     return html`
       ${this.idle ? this.renderIdleView : ''}
-      ${this.config.collapse && this.player.active ? html`
+      ${this.hasControls ? html`
         <mmp-media-controls
           .player=${this.player}
           .config=${this.config}>
@@ -78,7 +86,7 @@ class MiniMediaPlayerPowerstrip extends LitElement {
         </mmp-sound-menu>` : ''}
       ${this.showGroupButton ? html`
         <paper-icon-button class='group-button'
-          .icon=${ICON.GROUP}
+          .icon=${this.icon}
           ?inactive=${!this.player.isGrouped}
           ?color=${this.groupVisible}
           @click=${this.handleGroupClick}>
@@ -118,23 +126,25 @@ class MiniMediaPlayerPowerstrip extends LitElement {
       css`
         :host {
           display: flex;
-          line-height: 40px;
-          max-height: 40px;
+          line-height: var(--mmp-unit);
+          max-height: var(--mmp-unit);
         }
         :host([flow]) mmp-media-controls {
           max-width: unset;
         }
         mmp-media-controls {
-          max-width: 200px;
+          max-width: calc(var(--mmp-unit) * 5);
+          line-height: initial;
+          justify-content: flex-end;
         }
         .group-button {
-          height: 34px;
-          width: 34px;
-          min-width: 34px;
+          height: calc(var(--mmp-unit) * .85);
+          width: calc(var(--mmp-unit) * .85);
+          min-width: calc(var(--mmp-unit) * .85);
           margin: 3px;
         }
         paper-icon-button {
-          min-width: 40px;
+          min-width: var(--mmp-unit);
         }
       `,
     ];

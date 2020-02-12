@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit-element';
 
 import './dropdown';
+import './button';
 
 import sharedStyle from '../sharedStyle';
 
@@ -28,8 +29,12 @@ class MiniMediaPlayerShortcuts extends LitElement {
     return this.player.getAttribute(this.shortcuts.attribute);
   }
 
+  get height() {
+    return this.shortcuts.column_height || 36;
+  }
+
   render() {
-    if (!this.show) return;
+    if (!this.show) return html``;
     const { active } = this;
 
     const list = this.list ? html`
@@ -44,15 +49,19 @@ class MiniMediaPlayerShortcuts extends LitElement {
     const buttons = this.buttons ? html`
       <div class='mmp-shortcuts__buttons'>
         ${this.buttons.map(item => html`
-          <mwc-button
-            dense raised
+          <mmp-button
+            style=${`min-height: ${this.height}px;`}
+            raised
             columns=${this.shortcuts.columns}
             ?color=${item.id === active}
             class='mmp-shortcuts__button'
-            @click='${e => this.handleShortcut(e, item)}'>
-            ${item.icon ? html`<iron-icon .icon=${item.icon}></iron-icon>` : ''}
-            ${item.name ? html`<span class="ellipsis">${item.name}</span>` : ''}
-          </mwc-button>`)}
+            @click=${e => this.handleShortcut(e, item)}>
+            <div align=${this.shortcuts.align_text}>
+              ${item.icon ? html`<iron-icon .icon=${item.icon}></iron-icon>` : ''}
+              ${item.image ? html`<img src=${item.image}>` : ''}
+              ${item.name ? html`<span class="ellipsis">${item.name}</span>` : ''}
+            </div>
+          </mmp-button>`)}
       </div>
     ` : '';
 
@@ -66,6 +75,8 @@ class MiniMediaPlayerShortcuts extends LitElement {
     const { type, id, data } = item || ev.detail;
     if (type === 'source')
       return this.player.setSource(ev, id);
+    if (type === 'service')
+      return this.player.toggleService(ev, id, data);
     if (type === 'script')
       return this.player.toggleScript(ev, id, data);
     if (type === 'sound_mode')
@@ -88,24 +99,23 @@ class MiniMediaPlayerShortcuts extends LitElement {
           margin-top: 8px;
         }
         .mmp-shortcuts__button {
-          --mdc-theme-primary: transparent;
-          box-sizing: border-box;
-          margin: 4px;
-          min-width: 0;
           min-width: calc(50% - 8px);
           flex: 1;
-          overflow: hidden;
-          transition: background .5s;
-          background: rgba(255,255,255,0.25);
-          box-shadow:
-            0px 3px 1px -2px rgba(0, 0, 0, 0.2),
-            0px 2px 2px 0px rgba(0, 0, 0, 0.14),
-            0px 1px 5px 0px rgba(0,0,0,.12);
         }
-        .mmp-shortcuts__button[color] {
-          background: var(--mmp-active-color);
+        .mmp-shortcuts__button > div {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 100%;
+          padding: .2em 0;
         }
-        .mmp-shortcuts__button[columns='0'] {
+        .mmp-shortcuts__button > div[align='left'] {
+          justify-content: flex-start;
+        }
+        .mmp-shortcuts__button > div[align='right'] {
+          justify-content: flex-end;
+        }
+        .mmp-shortcuts__button[columns='1'] {
           min-width: calc(100% - 8px);
         }
         .mmp-shortcuts__button[columns='3'] {
@@ -114,12 +124,25 @@ class MiniMediaPlayerShortcuts extends LitElement {
         .mmp-shortcuts__button[columns='4'] {
           min-width: calc(25% - 8px);
         }
-        .mmp-shortcuts__button > span {
-          line-height: 24px;
+        .mmp-shortcuts__button[columns='5'] {
+          min-width: calc(20% - 8px);
+        }
+        .mmp-shortcuts__button[columns='6'] {
+          min-width: calc(16.66% - 8px);
+        }
+        .mmp-shortcuts__button > div > span {
+          line-height: calc(var(--mmp-unit) * .6);
           text-transform: initial;
         }
-        .mmp-shortcuts__button > *:nth-child(2) {
+        .mmp-shortcuts__button > div > iron-icon {
+          width: calc(var(--mmp-unit) * .6);
+          height: calc(var(--mmp-unit) * .6);
+        }
+        .mmp-shortcuts__button > div > *:nth-child(2) {
           margin-left: 4px;
+        }
+        .mmp-shortcuts__button > div > img {
+          height: 24px;
         }
       `,
     ];

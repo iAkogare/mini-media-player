@@ -233,6 +233,13 @@ export default class MediaPlayerObject {
     this.callService(e, 'media_play_pause');
   }
 
+  playStop(e) {
+    if (!this.isPlaying)
+      this.callService(e, 'media_play');
+    else
+      this.callService(e, 'media_stop');
+  }
+
   setSoundMode(e, name) {
     this.callService(e, 'select_sound_mode', { sound_mode: name });
   }
@@ -290,15 +297,15 @@ export default class MediaPlayerObject {
     const options = { entity_id: entity };
     if (checked) {
       options.master = this.config.entity;
-      if (platform === 'sonos') {
-        return this.callService(e, 'join', options, platform);
+      if (platform === 'bluesound') {
+        return this.callService(e, `${platform}_JOIN`, options);
       }
-      this.callService(e, `${platform}_JOIN`, options);
+      this.callService(e, 'join', options, platform);
     } else {
-      if (platform === 'sonos') {
-        return this.callService(e, 'unjoin', options, platform);
+      if (platform === 'bluesound') {
+        return this.callService(e, `${platform}_UNJOIN`, options);
       }
-      this.callService(e, `${platform}_UNJOIN`, options);
+      this.callService(e, 'unjoin', options, platform);
     }
   }
 
@@ -306,6 +313,14 @@ export default class MediaPlayerObject {
     this.callService(e, id.split('.').pop(), {
       ...data,
     }, 'script');
+  }
+
+  toggleService(e, id, data = {}) {
+    e.stopPropagation();
+    const [domain, service] = id.split('.');
+    this.hass.callService(domain, service, {
+      ...data,
+    });
   }
 
   callService(e, service, inOptions, domain = 'media_player') {

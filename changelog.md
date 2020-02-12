@@ -1,3 +1,137 @@
+## v1.6.0
+### ADDED
+- Allow master speaker to leave speaker group #213
+- New theme variable for raised buttons #212
+- New theme variable for name font weight
+
+### CHANGED
+- Increased font weight of buttons
+
+### FIXED
+- Broken leave button for group management
+- Disabled buttons are now properly disabled
+
+
+## v1.5.2
+### ADDED
+- New icon state option, change entity icon color depending on state, disabled by default, see `icon_state` in `hide` option #186 #144
+
+### CHANGED
+- Reduced card paddings when using group option #210
+
+### FIXED
+- Broken dropdown menus in latest iOS #207
+
+## v1.5.1
+### ADDED
+- Dynamic alignment of dropdown lists (#201)
+
+### FIXED
+- Broken dropdown lists (#201)
+- Invisible icons (maybe?)
+
+## v1.5.0
+### ADDED
+- Option to display image in shortcut #146 (#192) - (@tcarlsen)
+- Tap action option #174 (#191) - (@darkkatarsis)
+- Option for card UI scale #156 (#187)
+- Theme variable for card UI scale #156 (#187)
+- Theme variable for card background opacity #189
+- Shortcut example with service call (#196) - (@exetico)
+
+### FIXED
+- Source dropdown not updating with backend #184
+- Invalid icon color
+- Clipped/Cut off volume pin #185
+
+## v1.4.2
+### ADDED
+- Optional stop / play_stop button #167 (#177) - (@guillaumelamirand)
+- Theme variable for linear color stop in `full-cover` mode (#178) - (@guillaumelamirand)
+
+### FIXED
+- Fixed responsive spacing of media controls
+- Prevent the extra card padding when there's no progressbar present
+- Fixed overflowing artwork
+
+## v1.4.1
+### FIXED
+- Fixed invalid progress bar seek position in multi column card setups
+
+## v1.4.0
+### ADDED
+- Drag/swipe support on the progress bar to make fine adjustments easier.
+- New progress bar height theme variable `mini-media-player-progress-height`
+- Increased max columns of shortcut buttons to `6` (from `5`) (#163)
+
+### CHANGED
+- Changed progress bar height to `6px`, and `4px` with group option (from `4px`)
+- Increased top/bottom card padding with group option to `10px`
+- Progress bar will now move isntantly to the new position on user seek, instead of 1 sec of animation
+
+### FIXED
+- Misplaced volume knob text in certain configurations (#166)
+
+## v1.3.1
+### FIXED
+- Duplicate controls with certain card configurations (#169)
+
+## v1.3.0
+### ADDED
+- New independent icon color theme variable (#142)
+- New theme variable to adjust artwork opacity
+- New option to change speaker group button icon (#150)
+- Speaker group management/multiroom support for Snapcast & Bluesound platforms (#161) (@lyghtnox)
+
+### CHANGED
+- Allow dropdown text for source/sound mode if both controls and volume is hidden (#149) (#152) (@bernimoses)
+
+### FIXED
+- Overlapping progress-bar (#143)
+- No longer sending `entity_id` parameter by default with shortcut service calls (#164)
+
+## v1.2.2
+### CHANGED
+- Adjusted tts text input color
+- Adjustements to active button color
+
+### FIXED
+- Fixed invisible progress bars (#138)
+- Preserve state-icon color on entity icon unless overridden
+
+## v1.2.1
+### ADDED
+- New base-color (`mini-media-player-base-color`) theme variable (#130)
+- New overlay-accent-color (`mini-media-player-overlay-accent-color`) theme variable (#118)
+- New `align_text` option to shortcuts object, to specify alignment of button content (text/icon) (#87)
+- Added support for `webos` notify as tts platform (#136)
+
+### CHANGED
+- Updated HACS readme
+
+### FIXED
+- Fixed `Cannot convert undefined` errors (#127)
+- Updated README with new default google tts name (#134) (@ngreis)
+- Prevent cut off volume pin when used in entities card (#131)
+- Respecting ha-card-background theme variable (if set)
+- Fixed alignment of playback buttons if limited card space
+
+## v1.2.0
+### ADDED
+- Added support for service calls through shortcuts (#121)
+- Added column height option to shortcuts object (#129)
+- Added the option parameter `5` to shortcuts column option
+- Added documentation for use with [HACS](https://github.com/custom-components/hacs)
+
+### CHANGED
+- Changed button component
+
+### FIXED
+- Fixed runtime misplacement (#119)
+- Fixed shortcuts not hiding properly
+- Fixed controls not hiding propertly if config changed in runtime
+- Fixed repeat popup-card issue (#122) (@iantrich)
+
 ## v1.1.3
 Sonos group management is now compatible with HA > 0.93.
 Sonos group management is no longer compatible with HA < 0.93.
