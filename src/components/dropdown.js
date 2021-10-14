@@ -36,28 +36,27 @@ class MiniMediaPlayerDropdown extends LitElement {
         .horizontalAlign=${'right'}
         .verticalAlign=${'top'}
         .verticalOffset=${44}
-        .dynamicAlign=${true}
         @click=${e => e.stopPropagation()}>
         ${this.icon ? html`
-          <paper-icon-button
+          <ha-icon-button
             class='mmp-dropdown__button icon'
             slot='dropdown-trigger'
             .icon=${ICON.DROPDOWN}>
-          </paper-icon-button>
+          </ha-icon-button>
         ` : html`
           <mmp-button class='mmp-dropdown__button' slot='dropdown-trigger'>
             <div>
               <span class='mmp-dropdown__label ellipsis'>
                 ${this.selected || this.label}
               </span>
-              <iron-icon class='mmp-dropdown__icon' .icon=${ICON.DROPDOWN}></iron-icon>
+              <ha-icon class='mmp-dropdown__icon' .icon=${ICON.DROPDOWN}></ha-icon>
             </div>
           </mmp-button>
         `}
         <paper-listbox slot="dropdown-content" .selected=${this.selectedId} @iron-select=${this.onChange}>
           ${this.items.map(item => html`
             <paper-item value=${item.id || item.name}>
-              ${item.icon ? html`<iron-icon .icon=${item.icon}></iron-icon>` : ''}
+              ${item.icon ? html`<ha-icon .icon=${item.icon}></ha-icon>` : ''}
               ${item.name ? html`<span class='mmp-dropdown__item__label'>${item.name}</span>` : ''}
             </paper-item>`)}
         </paper-listbox>
@@ -114,22 +113,22 @@ class MiniMediaPlayerDropdown extends LitElement {
           text-transform: none;
         }
         .mmp-dropdown__icon {
-          height: calc(var(--mmp-unit) * .6);
+          height: auto;
           width: calc(var(--mmp-unit) * .6);
           min-width: calc(var(--mmp-unit) * .6);
         }
         paper-item > *:nth-child(2) {
           margin-left: 4px;
         }
-        paper-menu-button[focused] mmp-button iron-icon {
+        paper-menu-button[focused] mmp-button ha-icon {
           color: var(--mmp-accent-color);
           transform: rotate(180deg);
         }
-        paper-menu-button[focused] paper-icon-button {
+        paper-menu-button[focused] ha-icon-button {
           color: var(--mmp-accent-color);
           transform: rotate(180deg);
         }
-        paper-menu-button[focused] paper-icon-button[focused] {
+        paper-menu-button[focused] ha-icon-button[focused] {
           color: var(--mmp-text-color);
           transform: rotate(0deg);
         }

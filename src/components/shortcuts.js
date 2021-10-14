@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'lit-element';
+import { styleMap } from 'lit-html/directives/style-map';
 
 import './dropdown';
 import './button';
@@ -50,14 +51,14 @@ class MiniMediaPlayerShortcuts extends LitElement {
       <div class='mmp-shortcuts__buttons'>
         ${this.buttons.map(item => html`
           <mmp-button
-            style=${`min-height: ${this.height}px;`}
+            style="${styleMap(this.shortcutStyle(item))}"
             raised
             columns=${this.shortcuts.columns}
             ?color=${item.id === active}
             class='mmp-shortcuts__button'
             @click=${e => this.handleShortcut(e, item)}>
             <div align=${this.shortcuts.align_text}>
-              ${item.icon ? html`<iron-icon .icon=${item.icon}></iron-icon>` : ''}
+              ${item.icon ? html`<ha-icon .icon=${item.icon}></ha-icon>` : ''}
               ${item.image ? html`<img src=${item.image}>` : ''}
               ${item.name ? html`<span class="ellipsis">${item.name}</span>` : ''}
             </div>
@@ -88,6 +89,13 @@ class MiniMediaPlayerShortcuts extends LitElement {
     this.player.setMedia(ev, options);
   }
 
+  shortcutStyle(item) {
+    return {
+      'min-height': `${this.height}px`,
+      ...(item.cover && { 'background-image': `url(${item.cover})` }),
+    };
+  }
+
   static get styles() {
     return [
       sharedStyle,
@@ -101,6 +109,9 @@ class MiniMediaPlayerShortcuts extends LitElement {
         .mmp-shortcuts__button {
           min-width: calc(50% - 8px);
           flex: 1;
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center center;
         }
         .mmp-shortcuts__button > div {
           display: flex;
@@ -134,7 +145,7 @@ class MiniMediaPlayerShortcuts extends LitElement {
           line-height: calc(var(--mmp-unit) * .6);
           text-transform: initial;
         }
-        .mmp-shortcuts__button > div > iron-icon {
+        .mmp-shortcuts__button > div > ha-icon {
           width: calc(var(--mmp-unit) * .6);
           height: calc(var(--mmp-unit) * .6);
         }

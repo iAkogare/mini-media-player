@@ -9,7 +9,7 @@
         }
       }
     ],
-    ["minify"]
+		["minify"]
   ],
   "comments": false,
   "plugins": [
@@ -22,6 +22,6 @@
       { "loose": true }
     ],
     ["@babel/plugin-transform-template-literals"],
-    ["iife-wrap"],
+    ["iife-wrap"]
   ]
 }

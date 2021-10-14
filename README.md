@@ -9,6 +9,7 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 
 ![Preview Image](https://user-images.githubusercontent.com/457678/47517460-9282d600-d888-11e8-9705-cf9ec3698c3c.png)
 
+
 ## Install
 
 *This card is available in [HACS](https://github.com/custom-components/hacs) (Home Assistant Community Store)*
@@ -17,12 +18,13 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 
 1. Download and copy `mini-media-player-bundle.js` from the [latest release](https://github.com/kalkih/mini-media-player/releases/latest) into your `config/www` directory.
 
-2. Add a reference to `mini-media-player-bundle.js` inside your `ui-lovelace.yaml`.
+2. Add a reference to `mini-media-player-bundle.js` inside your `configuration.yaml` or through the Home Assistant UI from the resource tab.
 
   ```yaml
-  resources:
-    - url: /local/mini-media-player-bundle.js?v=1.6.0
-      type: module
+  lovelace:
+    resources:
+      - url: /local/mini-media-player-bundle.js?v=1.13.0
+        type: module
   ```
 
 ### CLI install
@@ -32,27 +34,16 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 2. Grab `mini-media-player-bundle.js`
 
   ```console
-  $ wget https://github.com/kalkih/mini-media-player/releases/download/v1.6.0/mini-media-player-bundle.js
+  $ wget https://github.com/kalkih/mini-media-player/releases/download/v1.13.0/mini-media-player-bundle.js
   ```
 
-3. Add a reference to `mini-media-player-bundle.js` inside your `ui-lovelace.yaml`.
+3. Add a reference to `mini-media-player-bundle.js` inside your `configuration.yaml` or through the Home Assistant UI from the resource tab.
 
   ```yaml
-  resources:
-    - url: /local/mini-media-player-bundle.js?v=1.6.0
-      type: module
-  ```
-
-### *(Optional)* Add to custom updater
-
-1. Make sure you've the [custom_updater](https://github.com/custom-components/custom_updater) component installed and working.
-
-2. Add a new reference under `card_urls` in your `custom_updater` configuration in `configuration.yaml`.
-
-  ```yaml
-  custom_updater:
-    card_urls:
-      - https://raw.githubusercontent.com/kalkih/mini-media-player/master/tracker.json
+  lovelace:
+    resources:
+      - url: /local/mini-media-player-bundle.js?v=1.13.0
+        type: module
   ```
 
 ## Updating
@@ -60,12 +51,13 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 
 2. Replace the local file with the latest one attached in the [latest release](https://github.com/kalkih/mini-media-player/releases/latest).
 
-3. Add the new version number to the end of the cards reference url in your `ui-lovelace.yaml` like below.
+3. Add the new version number to the end of the cards reference url in your `configuration.yaml` or through the Home Assistant.
 
   ```yaml
-  resources:
-    - url: /local/mini-media-player-bundle.js?v=1.6.0
-      type: module
+  lovelace:
+    resources:
+      - url: /local/mini-media-player-bundle.js?v=1.13.0
+        type: module
   ```
 
 *You may need to empty the browsers cache if you have problems loading the updated card.*
@@ -84,12 +76,13 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 | tap_action | [action object](#action-object-options) | true | v0.7.0 | Action on click/tap.
 | group | boolean | optional | v0.1 | Removes paddings, background color and box-shadow.
 | hide | object | optional | v1.0.0 | Manage visible UI elements, see [hide object](#hide-object) for available options.
-| artwork | string | default | v0.4 | `cover` to display current artwork in the card background, `full-cover` to display full artwork, `none` to hide artwork, `full-cover-fit` for full cover without cropping.
+| artwork | string | default | v0.4 | `cover` to display current artwork in the card background, `full-cover` to display full artwork, `material` for alternate artwork display with dynamic colors, `none` to hide artwork, `full-cover-fit` for full cover without cropping.
 | tts | object | optional | v1.0.0 | Show Text-To-Speech input, see [TTS object](#tts-object) for available options.
 | source | string | optional | v0.7 | Change source select appearance, `icon` for just an icon, `full` for the full source name.
 | sound_mode | string | optional | v1.1.2 | Change sound mode select appearance, `icon` for just an icon, `full` for the full sound mode name.
 | info | string | optional | v1.0.0 | Change how the media information is displayed, `short` to limit media information to one row, `scroll` to scroll overflowing media info.
 | volume_stateless | boolean | false | v0.6 | Swap out the volume slider for volume up & down buttons.
+| volume_step | number | optional | v1.9.0 | Change the volume step size of the volume buttons and the volume slider (number between 1 - 100)<sup>[1](#option_foot1)</sup>.
 | max_volume | number | optional | v0.8.2 | Specify the max vol limit of the volume slider (number between 1 - 100).
 | min_volume | number | optional | v1.1.2 | Specify the min vol limit of the volume slider (number between 1 - 100).
 | replace_mute | string | optional | v0.9.8 | Replace the mute button, available options are `play_pause` (previously `play`), `stop`, `play_stop`, `next`.
@@ -99,6 +92,8 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 | speaker_group | object | optional | v1.0.0 | Speaker group management/multiroom, see [Speaker group object](#speaker-group-object) for available options.
 | shortcuts | object | optional | v1.0.0 | Media shortcuts in a list or as buttons, see [Shortcut object](#shortcuts-object) for available options.
 | scale | number | optional | v1.5.0 | UI scale modifier, default is `1`.
+
+<a name="option_foot1"><sup>1</sup></a> Only supported on entities with `volume_level` attribute.
 
 #### Idle object
 | Name | Type | Default | Description |
@@ -111,9 +106,9 @@ Inspired by [Custom UI: Mini media player](https://community.home-assistant.io/t
 #### TTS object
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| platform | string | **required** | Specify [TTS platform](https://www.home-assistant.io/components/tts/), e.g. `google_translate` or `amazon_polly`, `alexa`<sup>[1](#tts_foot1)</sup> for ["Alexa as Media Player"](https://community.home-assistant.io/t/echo-devices-alexa-as-media-player-testers-needed/58639), `ga`<sup>[2](#tts_foot2)</sup><sup>[3](#tts_foot3)</sup> for use with [Google Assistant Webserver](https://community.home-assistant.io/t/community-hass-io-add-on-google-assistant-webserver-broadcast-messages-without-interrupting-music/37274) or [Assistant Relay](https://github.com/greghesp/assistant-relay), `sonos`<sup>[2](#tts_foot2)</sup> for use with modified [sonos_say script](https://github.com/kalkih/mini-media-player/issues/86#issuecomment-465541825), `webos`<sup>[4](#tts_foot4)</sup>.
+| platform | string | **required** | Specify [TTS platform](https://www.home-assistant.io/components/tts/), e.g. `google_translate` or `amazon_polly`, `cloud` for Nabu Casa, `alexa`<sup>[1](#tts_foot1)</sup> for ["Alexa as Media Player"](https://community.home-assistant.io/t/echo-devices-alexa-as-media-player-testers-needed/58639), `ga`<sup>[2](#tts_foot2)</sup><sup>[3](#tts_foot3)</sup> for use with [Google Assistant Webserver](https://community.home-assistant.io/t/community-hass-io-add-on-google-assistant-webserver-broadcast-messages-without-interrupting-music/37274) or [Assistant Relay](https://github.com/greghesp/assistant-relay), `sonos`<sup>[2](#tts_foot2)</sup> for use with modified [sonos_say script](https://github.com/kalkih/mini-media-player/issues/86#issuecomment-465541825), `webos`<sup>[4](#tts_foot4)</sup>.
 | language | string | optional | The output language.
-| entity_id | string/list | optional | The *entity_id* of the desired output entity or a list of *entity_id's*, can also be `all` to broadcast to all entities.
+| entity_id | string/list | optional | The *entity_id* of the desired output entity or a list of *entity_id's*, can also be `all` to broadcast to all entities or `group` to target currently grouped speakers.
 | volume | float | optional | Volume level of tts output (0 - 1), only supported by platform `sonos`.
 | type | string | optional | `tts`, `announce` or `push`, defaults to `tts`, only supported by platform `alexa`, more info [here](https://github.com/keatontaylor/alexa_media_player/wiki/Notification-Component#functionality).
 
@@ -138,20 +133,32 @@ See [Speaker group management](#speaker-group-management) for example usage.
 
 **Supported platforms**
 - sonos
+- soundtouch
+- squeezebox<sup>[2](#speaker_foot2)</sup>
 - bluesound<sup>[2](#speaker_foot2)</sup>
 - snapcast<sup>[2](#speaker_foot2)</sup>
+- musiccast_yamaha<sup>[1](#speaker_foot1)</sup>
+- linkplay<sup>[3](#speaker_foot3)</sup>
+- media_player<sup>[4](#speaker_foot4)</sup>
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | entities | list | **required** | A list containing [speaker entities](#speaker-entity-object) of one of supported platforms, to enable group management of those speakers.
-| platform | string | 'sonos' | The media_player platform to control. `sonos`, `snapcast`, `bluesound` or `yamaha_musiccast`<sup>[1](#speaker_foot1)</sup>.
+| platform | string | 'sonos' | Any supported multiroom platform e.g. `sonos`, `soundtouch`, `bluesound`, see **supported platforms** above.
 | sync_volume | boolean | optional | Keep volume Synchronize between grouped speakers.
 | expanded | boolean | optional | Make the speaker group list expanded by default.
 | show_group_count | boolean | true | Have the number of grouped speakers displayed (if any) in the card name.
 | icon | string | optional | Override default group button icon *(any mdi icon)*.
+| group_mgmt_entity | string | optional | Override the player entity for the group management (Useful if you use a universal media_player as your entity but still want to use the grouping feature)
+| supports_master | boolean | optional | Set to false if your multiroom system does not define one of the media players as master. Defaults to `true` and has not to be set to false for `squeezebox` for backward compatibility.
 
-<a name="speaker_foot1"><sup>1</sup></a> Currently not yet supported in Home Assistant, *soon™*
-<a name="speaker_foot2"><sup>2</sup></a> Some features are not yet supported.
+<a name="speaker_foot1"><sup>1</sup></a> Requires [custom component](https://github.com/ppanagiotis/pymusiccast), available in HACS.
+
+<a name="speaker_foot2"><sup>2</sup></a> All features are not yet supported.
+
+<a name="speaker_foot3"><sup>3</sup></a> Requires [custom component](https://github.com/nagyrobi/home-assistant-custom-components-linkplay#multiroom) for sound devices based on Linkplay chipset, available in HACS.
+
+<a name="speaker_foot4"><sup>4</sup></a> HomeAssistant added join/unjoin services to the media_player. Future official integrations will implement these services (which are slightly different from the ones, which are already supported by this card) instead of implementing them in their own domain.
 
 #### Speaker entity object
 | Name | Type | Default | Description |
@@ -182,6 +189,7 @@ See [card with media shortcuts](#card-with-media-shortcuts) for example usage.
 | name | string | optional | A display name.
 | icon | string | optional | A display icon *(any mdi icon)*.
 | image | string | optional | A display image.
+| cover | string | optional | A cover image (only supported for button shortcuts).
 | type | string | **required** | Type of shortcut. A media type: `music`, `tvshow`, `video`, `episode`, `channel`, `playlist` e.g. or an action type: `source`, `sound_mode`, `script` or `service`.
 | id | string | **required** | The media identifier. The format of this is component dependent. For example, you can provide URLs to Sonos & Cast but only a playlist ID to iTunes & Spotify. A source/(sound mode) name can also be specified to change source/(sound mode), use together with type `source`/`sound_mode`. If type `script` specify the script name here or `service` specify the `<domain>.<service>`.
 | data | list | optional | Extra service payload<sup>[1](#shortcut_foot1)</sup>.
@@ -191,12 +199,13 @@ See [card with media shortcuts](#card-with-media-shortcuts) for example usage.
 #### Action object options
 | Name | Type | Default | Options | Description |
 |------|:----:|:-------:|:-----------:|-------------|
-| action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `none` | Action to perform.
+| action | string | `more-info` | `more-info` / `navigate` / `call-service`  / `url` / `fire-dom-event` / `none` | Action to perform.
 | entity | string |  | Any entity id | Override default entity of `more-info`, when  `action` is defined as `more-info`.
 | service | string |  | Any service | Service to call (e.g. `media_player.toggle`) when `action` is defined as `call-service`.
 | service_data | object |  | Any service data | Service data to include with the service call (e.g. `entity_id: media_player.office`).
 | navigation_path | string |  | Any path | Path to navigate to (e.g. `/lovelace/0/`) when `action` is defined as `navigate`.
 | url | string |  | Any URL | URL to open when `action` is defined as `url`.
+| new_tab | boolean | `false` | `true` / `false` | Open URL in new tab when `action` is defined as `url`.
 
 #### Hide object
 | Name | Type | Default | Description |
@@ -208,9 +217,12 @@ See [card with media shortcuts](#card-with-media-shortcuts) for example usage.
 | source | boolean | false | The source select.
 | sound_mode | boolean | true | The sound_mode select.
 | controls | boolean | false | The media playback controls.
+| prev | boolean | false | The "previous" playback control button.
+| next | boolean | false | The "next" playback control button.
 | play_pause | boolean | false | The play/pause button in media playback controls.
 | play_stop | boolean | true | The play/stop button in media playback controls.
 | volume | boolean | false | The volume controls.
+| volume_level | boolean | true | The current volume level in percentage.
 | mute | boolean | false | The mute button.
 | progress | boolean | false | The progress bar.
 | runtime | boolean | true | The media runtime indicators.
@@ -218,6 +230,7 @@ See [card with media shortcuts](#card-with-media-shortcuts) for example usage.
 | power_state | boolean | true | Dynamic color of the power button to indicate on/off.
 | icon_state | boolean | true | Dynamic color of the entity icon to indicate entity state.
 | shuffle | boolean | true | The shuffle button (only for players with `shuffle_set` support).
+| state_label | boolean | false | State labels such as `Unavailable` & `Idle`.
 
 
 ### Theme variables
@@ -286,7 +299,7 @@ You can specify media shortcuts through the `shortcuts` option, either as a list
       # Start predefined playlist
       - icon: mdi:cat
         type: playlist
-        id: spotify:user:spotify:playlist:37i9dQZF1DZ06evO2O09Hg
+        id: spotify:user:XXXXXXX:playlist:37i9dQZF1DZ06evO2O09Hg # Where XXXXXXX is your User ID
       # Change the source to bathroom
       - icon: mdi:dog
         type: source
@@ -302,7 +315,7 @@ You can specify media shortcuts through the `shortcuts` option, either as a list
         data:
           entity_id: media_player.googlehome1234
           uri: spotify:playlist:37i9dQZF1DX9XiAcF7t1s5
-          
+
       ... # etc.
 ```
 **Tip**:

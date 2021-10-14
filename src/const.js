@@ -6,9 +6,13 @@ const DEFAULT_HIDE = {
   sound_mode: true,
   runtime: true,
   volume: false,
+  volume_level: true,
   controls: false,
   play_pause: false,
   play_stop: true,
+  prev: false,
+  next: false,
+  state_label: false,
 };
 const ICON = {
   DEFAULT: 'mdi:cast',
@@ -35,8 +39,9 @@ const ICON = {
   VOL_DOWN: 'mdi:volume-minus',
   VOL_UP: 'mdi:volume-plus',
 };
-const UPDATE_PROPS = ['entity', '_overflow',
-  'break', 'thumbnail', 'edit', 'idle'];
+
+const UPDATE_PROPS = ['entity', 'groupMgmtEntity', '_overflow',
+  'break', 'thumbnail', 'prevThumbnail', 'edit', 'idle', 'cardHeight', 'backgroundColor', 'foregroundColor'];
 
 const PROGRESS_PROPS = ['media_duration', 'media_position', 'media_position_updated_at'];
 
@@ -53,6 +58,17 @@ const MEDIA_INFO = [
   { attr: 'app_name' },
 ];
 
+const PLATFORM = {
+  SONOS: 'sonos',
+  SQUEEZEBOX: 'squeezebox',
+  BLUESOUND: 'bluesound',
+  SOUNDTOUCH: 'soundtouch',
+  MEDIAPLAYER: 'media_player',
+};
+
+const CONTRAST_RATIO = 4.5;
+
+const COLOR_SIMILARITY_THRESHOLD = 150;
 
 export {
   DEFAULT_HIDE,
@@ -62,4 +78,7 @@ export {
   BREAKPOINT,
   LABEL_SHORTCUT,
   MEDIA_INFO,
+  PLATFORM,
+  CONTRAST_RATIO,
+  COLOR_SIMILARITY_THRESHOLD,
 };

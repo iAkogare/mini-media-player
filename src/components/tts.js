@@ -1,17 +1,18 @@
 import { LitElement, html, css } from 'lit-element';
 
-import getLabel from '../utils/getLabel';
+import t from '../utils/translation';
 
 class MiniMediaPlayerTts extends LitElement {
   static get properties() {
     return {
       hass: {},
       config: {},
+      player: {},
     };
   }
 
   get label() {
-    return getLabel(this.hass, 'ui.card.media_player.text_to_speak', 'Say');
+    return t(this.hass, 'placeholder.tts', 'ui.card.media_player.text_to_speak', 'Say');
   }
 
   get input() {
@@ -30,7 +31,7 @@ class MiniMediaPlayerTts extends LitElement {
         @click=${e => e.stopPropagation()}>
       </paper-input>
       <mmp-button class='mmp-tts__button' @click=${this.handleTts}>
-        <span>SEND</span>
+        <span>${t(this.hass, 'label.send')}</span>
       </mmp-button>
     `;
   }
@@ -39,7 +40,8 @@ class MiniMediaPlayerTts extends LitElement {
     const { config, message } = this;
     const opts = {
       message,
-      entity_id: config.entity_id || this.entity,
+      entity_id: config.entity_id || this.player.id,
+      ...(config.entity_id === 'group' && { entity_id: this.player.group }),
     };
     if (config.language) opts.language = config.language;
     if (config.platform === 'alexa')
@@ -95,6 +97,7 @@ class MiniMediaPlayerTts extends LitElement {
       paper-input {
         opacity: .75;
         --paper-input-container-color: var(--mmp-text-color);
+        --paper-input-container-input-color: var(--mmp-text-color);
         --paper-input-container-focus-color: var(--mmp-text-color);
         --paper-input-container: {
           padding: 0;
@@ -105,11 +108,9 @@ class MiniMediaPlayerTts extends LitElement {
       }
 
       ha-card[artwork*='cover'][has-artwork] paper-input {
-        --paper-input-container-focus-color: #FFFFFF;
-      }
-      ha-card[artwork*='cover'][has-artwork] paper-input {
         --paper-input-container-color: #FFFFFF;
         --paper-input-container-input-color: #FFFFFF;
+        --paper-input-container-focus-color: #FFFFFF;
       }
     `;
   }

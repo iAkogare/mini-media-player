@@ -1,3 +1,162 @@
+## v1.13.0
+### NEW
+- Support for the new default media player grouping functionality (#525) #519 #528 @micha91   
+  This should allow support for all future multi-room integrations following the new standard
+- Added new speaker group configuration `support_master` (#525) @micha91
+
+### FIXED
+- Issue where player progress continued when paused (#521) #346 @BoOmka
+
+### TRANSLATIONS
+-  Add russian translations (#510)
+
+### DOCUMENTATION
+- Clarify which section of configuration.yaml to edit (#526) @ronnix
+
+## v1.12.1
+### NEW
+- Support for `fire-dom-event` #484 (#485) @RomRider
+
+### FIXED
+- Fixed missing speaker group checkboxes #418 (#464) @mcguiresean @RomRider
+- Changed name of multiroom integration yamaha_musiccast -> musiccast_yamaha (#476) @winterscar
+- Remove idle_view option from UI editor #468 (#502)
+- Fix missing player icon #467 (#503)
+
+### TRANSLATIONS
+-  Add German translations #482 (#487) @Ruud2702
+
+
+## v1.12.0
+### NEW
+- Added card to the Lovelace card picker (#436) @dcs8
+- Added card editor UI (#442) @dcs8
+- Added option to hide state labels
+- Added option to override entity for group management (#458) @RomRider
+- Hide next and prev buttons by default on unsupported entities (#433) @dmamontov
+
+### FIXED
+- Fixed missing speaker group checkboxes #418 (#464) @mcguiresean @RomRider
+- Broken scale option #415
+- Fix artwork fallback (#449) @CarsonF
+
+### TRANSLATIONS
+- Added Norwegian translations (#411) @kristomi
+- Added CZ translation (#434) @KubaDee
+
+### DOCUMENTATION
+- Add mention for Nabu Casa, which seems to work (#456) @mrand
+- Clarify docs regarding spotify playlist shortcut #441 (#461) @BenFR23
+
+
+## v1.11.0
+### NEW
+- Ability to display volume level percentage #289 (#406)
+- New tap action option, open url in new tab #227 (#405)
+
+### FIXED
+- Fix disappearing background #393 (#402)
+
+### TRANSLATIONS
+- Added Ukrainian translations (#400) @denysdovhan
+- Improved Hungarian translations (#396) @nagyrobi
+
+
+## v1.10.2
+### NEW
+- Add support for slider volume steps #365 (#382)
+
+### FIXED
+- Prevent jumping artwork when transitioning artwork material #378 (#381)
+- Invisible default slider container color #387 (#390)
+- Artwork not clearing post playback #376 (#391)
+- Artwork url fallback if failing fetch of base64 image #385 (#392)
+
+### CHANGES
+- Minor changes to background & artwork transitions
+
+### TRANSLATIONS
+- Add Hungarian translations (#377) @nagyrobi
+- Update tts label string (#384) @agneevX
+- Translation support for master string (#380)
+
+
+## v1.10.1
+### NEW
+- Add Polish translations (#370) @cyrosy
+- Add French translations (#371) @bieniu
+
+### FIXED
+- Fixed invalid text & icon colors when using artwork cover option (#372)
+- Fixed missing icon & broken default artwork #369 (#375)
+
+
+## v1.10.0
+### NEW
+- Smoothly fade in & crossfade between cover artwork (#339)
+- Add support for custom card specific translations #345 (#363)
+- New cover artwork display option (material) #333 (#331) @SBado w inspo from @zsarnett
+
+### FIXED
+- Misaligned dropdown icon #325 (#332)
+- Always expand dropdowns downwards #267 (#323)
+- Fetch artwork completely before displaying to prevent flickering #321 (#339)
+- Replace deprecated background theme variable #359 (#362) @agneevX
+- Fix progress bar overflow in Safari when round card corners #352 (#364)
+
+### DOCUMENTATION
+- Added Yamaha musiccast multiroom information (#353) @ppanagiotis
+- Added Linkplay multiroom platform information (#356) @nagyrobi
+
+🌐 Feel free to submit translations by adding strings in the [translations](https://github.com/kalkih/mini-media-player/blob/dev/src/translations.js) file & submitting the changes in a PR.
+
+
+## v1.9.1
+### FIXED
+- Fix broken shortcut column height #318 (#319)
+
+
+## v1.9.0
+### NEW
+- Squeezebox multiroom support (#312) **(BETA)**
+- Volume step size option for volume buttons #219 (#308) @craiq
+- Added `cover` option for shortcut items #236 (#314)
+
+### FIXED
+- Fixed misaligned icons #305 (#310)
+- Fixed misaligned multiroom button #305 (#313)
+- Updated bluesound service calls for speaker group management #296 (#315)
+
+
+## v1.8.1
+### FIXED
+- Changed icon element for HA > 0.110.0 support #302 (#304)
+
+
+## v1.8.0
+### ADDED
+- Options to hide previous and/or next playback controls #233 (#275)
+- Sync mute status on all speakers when `sync_volume` is enabled #262 (#274)
+- New `tts` option `entity_id` parameter to target currently grouped speakers #268 (#273)
+
+### FIXED
+- Resume progress tracking correcty after switching between tabs #269 (#272)
+- Fixed tts text color when artwork is present #270 (#271)
+- Changed button element for HA > 0.110.0 support #297 (#301)
+
+### DOCS
+- Removed deprecated custom_updater instructions (#290) @inverse
+
+
+## v1.7.0
+### ADDED
+- Support for Soundtouch multiroom (#165)
+
+### FIXED
+- Removed usage of deprecated thumbnail/artwork api endpoint #244 (#253)
+- Fixed button theme variable not sticking to speaker group buttons
+
+
 ## v1.6.0
 ### ADDED
 - Allow master speaker to leave speaker group #213

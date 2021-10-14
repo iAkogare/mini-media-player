@@ -1,10 +1,12 @@
-import { PROGRESS_PROPS, MEDIA_INFO } from './const';
+import { PROGRESS_PROPS, MEDIA_INFO, PLATFORM } from './const';
+import arrayBufferToBase64 from './utils/misc';
 
 export default class MediaPlayerObject {
   constructor(hass, config, entity) {
     this.hass = hass || {};
     this.config = config || {};
     this.entity = entity || {};
+    this.entityId = entity && entity.entity_id || this.config.entity;
     this.state = entity.state;
     this.attr = entity.attributes;
     this.idle = config.idle_view ? this.idleView : false;
@@ -82,16 +84,27 @@ export default class MediaPlayerObject {
   }
 
   get group() {
-    const groupName = `${this.config.speaker_group.platform}_group`;
-    return this.attr[groupName] || [];
+    if (this.platform === PLATFORM.SQUEEZEBOX) {
+      return this.attr.sync_group || [];
+    }
+    if (this.platform === PLATFORM.MEDIAPLAYER) {
+      return this.attr.group_members || [];
+    }
+    return this.attr[`${this.platform}_group`] || [];
+  }
+
+  get platform() {
+    return this.config.speaker_group.platform;
   }
 
   get master() {
-    return this.group[0] || this.config.entity;
+    return this.supportsMaster
+      ? this.group[0] || this.entityId
+      : this.entityId;
   }
 
   get isMaster() {
-    return this.master === this.config.entity;
+    return this.master === this.entityId;
   }
 
   get sources() {
@@ -119,7 +132,7 @@ export default class MediaPlayerObject {
   }
 
   get picture() {
-    return this.attr.entity_picture;
+    return this.attr.entity_picture_local || this.attr.entity_picture;
   }
 
   get hasArtwork() {
@@ -143,8 +156,22 @@ export default class MediaPlayerObject {
       && PROGRESS_PROPS.every(prop => prop in this.attr);
   }
 
+  get supportsPrev() {
+    return (this.attr.supported_features | 16) // eslint-disable-line no-bitwise
+      === this.attr.supported_features;
+  }
+
+  get supportsNext() {
+    return (this.attr.supported_features | 32) // eslint-disable-line no-bitwise
+      === this.attr.supported_features;
+  }
+
   get progress() {
-    return this.position + (Date.now() - new Date(this.updatedAt).getTime()) / 1000.0;
+    if (this.isPlaying) {
+      return this.position + (Date.now() - new Date(this.updatedAt).getTime()) / 1000.0;
+    } else {
+      return this.position;
+    }
   }
 
   get idleView() {
@@ -186,22 +213,30 @@ export default class MediaPlayerObject {
     return !(typeof this.attr.is_volume_muted === 'undefined');
   }
 
-  getAttribute(attribute) {
-    return this.attr[attribute] || '';
+  get supportsVolumeSet() {
+    return !(typeof this.attr.volume_level === 'undefined');
   }
 
-  async fetchThumbnail() {
+  get supportsMaster() {
+    return this.platform !== PLATFORM.SQUEEZEBOX && this.config.speaker_group.supports_master;
+  }
+
+  async fetchArtwork() {
+    const url = this.attr.entity_picture_local ? this.hass.hassUrl(this.picture) : this.picture;
+
     try {
-      const { content_type: contentType, content } = await this.hass.callWS({
-        type: 'media_player_thumbnail',
-        entity_id: this.config.entity,
-      });
-      return `url(data:${contentType};base64,${content})`;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('mini-media-player: Failed fetching thumbnail');
+      const res = await fetch(new Request(url));
+      const buffer = await res.arrayBuffer();
+      const image64 = arrayBufferToBase64(buffer);
+      const imageType = res.headers.get('Content-Type') || 'image/jpeg';
+      return `url(data:${imageType};base64,${image64})`;
+    } catch (error) {
       return false;
     }
+  }
+
+  getAttribute(attribute) {
+    return this.attr[attribute] || '';
   }
 
   toggle(e) {
@@ -214,7 +249,16 @@ export default class MediaPlayerObject {
   }
 
   toggleMute(e) {
-    this.callService(e, 'volume_mute', { is_volume_muted: !this.muted });
+    if (this.config.speaker_group.sync_volume) {
+      this.group.forEach((entity) => {
+        this.callService(e, 'volume_mute', {
+          entity_id: entity,
+          is_volume_muted: !this.muted,
+        });
+      });
+    } else {
+      this.callService(e, 'volume_mute', { is_volume_muted: !this.muted });
+    }
   }
 
   toggleShuffle(e) {
@@ -257,11 +301,21 @@ export default class MediaPlayerObject {
   }
 
   volumeUp(e) {
-    this.callService(e, 'volume_up');
+    if (this.supportsVolumeSet && this.config.volume_step > 0) {
+      this.callService(e, 'volume_set', {
+        entity_id: this.entityId,
+        volume_level: Math.min(this.vol + this.config.volume_step / 100, 1),
+      });
+    } else this.callService(e, 'volume_up');
   }
 
   volumeDown(e) {
-    this.callService(e, 'volume_down');
+    if (this.supportsVolumeSet && this.config.volume_step > 0) {
+      this.callService(e, 'volume_set', {
+        entity_id: this.entityId,
+        volume_level: Math.max(this.vol - this.config.volume_step / 100, 0),
+      });
+    } else this.callService(e, 'volume_down');
   }
 
   seek(e, pos) {
@@ -286,27 +340,54 @@ export default class MediaPlayerObject {
       });
     } else {
       this.callService(e, 'volume_set', {
-        entity_id: this.config.entity,
+        entity_id: this.entityId,
         volume_level: vol,
       });
     }
   }
 
   handleGroupChange(e, entity, checked) {
-    const { platform } = this.config.speaker_group;
+    const { platform } = this;
     const options = { entity_id: entity };
     if (checked) {
-      options.master = this.config.entity;
-      if (platform === 'bluesound') {
-        return this.callService(e, `${platform}_JOIN`, options);
+      options.master = this.entityId;
+      switch (platform) {
+        case PLATFORM.SOUNDTOUCH:
+          return this.handleSoundtouch(e, this.isGrouped ? 'ADD_ZONE_SLAVE' : 'CREATE_ZONE', entity);
+        case PLATFORM.SQUEEZEBOX:
+          return this.callService(e, 'sync', {
+            entity_id: this.entityId,
+            other_player: entity,
+          }, PLATFORM.SQUEEZEBOX);
+        case PLATFORM.MEDIAPLAYER:
+          return this.callService(e, 'join', {
+            entity_id: this.entityId,
+            group_members: entity,
+          }, platform);
+        default:
+          return this.callService(e, 'join', options, platform);
       }
-      this.callService(e, 'join', options, platform);
     } else {
-      if (platform === 'bluesound') {
-        return this.callService(e, `${platform}_UNJOIN`, options);
+      switch (platform) {
+        case PLATFORM.SOUNDTOUCH:
+          return this.handleSoundtouch(e, 'REMOVE_ZONE_SLAVE', entity);
+        case PLATFORM.SQUEEZEBOX:
+          return this.callService(e, 'unsync', options, PLATFORM.SQUEEZEBOX);
+        case PLATFORM.MEDIAPLAYER:
+          return this.callService(e, 'unjoin', {
+            entity_id: entity,
+          }, platform);
+        default:
+          return this.callService(e, 'unjoin', options, platform);
       }
-      this.callService(e, 'unjoin', options, platform);
     }
+  }
+
+  handleSoundtouch(e, service, entity) {
+    return this.callService(e, service, {
+      master: this.master,
+      slaves: entity,
+    }, PLATFORM.SOUNDTOUCH, true);
   }
 
   toggleScript(e, id, data = {}) {
@@ -323,10 +404,10 @@ export default class MediaPlayerObject {
     });
   }
 
-  callService(e, service, inOptions, domain = 'media_player') {
+  callService(e, service, inOptions, domain = 'media_player', omit = false) {
     e.stopPropagation();
     this.hass.callService(domain, service, {
-      entity_id: this.config.entity,
+      ...(!omit && { entity_id: this.entityId }),
       ...inOptions,
     });
   }

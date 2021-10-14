@@ -7,7 +7,7 @@ import './mediaControls';
 import { ICON } from '../const';
 import sharedStyle from '../sharedStyle';
 
-import getLabel from '../utils/getLabel';
+import t from '../utils/translation';
 
 class MiniMediaPlayerPowerstrip extends LitElement {
   static get properties() {
@@ -56,11 +56,15 @@ class MiniMediaPlayerPowerstrip extends LitElement {
     return (this.player.soundModes.length > 0 && !this.config.hide.sound_mode);
   }
 
+  get showLabel() {
+    return !this.config.hide.state_label;
+  }
+
   render() {
-    if (this.player.isUnavailable)
+    if (this.player.isUnavailable && this.showLabel)
       return html`
         <span class='label ellipsis'>
-          ${getLabel(this.hass, 'state.default.unavailable', 'Unavailable')}
+          ${t(this.hass, 'state.unavailable', 'state.default.unavailable')}
         </span>
       `;
 
@@ -85,18 +89,18 @@ class MiniMediaPlayerPowerstrip extends LitElement {
           ?full=${this.config.sound_mode === 'full'}>
         </mmp-sound-menu>` : ''}
       ${this.showGroupButton ? html`
-        <paper-icon-button class='group-button'
+        <ha-icon-button class='group-button'
           .icon=${this.icon}
           ?inactive=${!this.player.isGrouped}
           ?color=${this.groupVisible}
           @click=${this.handleGroupClick}>
-        </paper-icon-button>` : ''}
+        </ha-icon-button>` : ''}
       ${this.showPowerButton ? html`
-        <paper-icon-button class='power-button'
+        <ha-icon-button class='power-button'
           .icon=${ICON.POWER}
           @click=${e => this.player.toggle(e)}
           ?color=${this.powerColor}>
-        </paper-icon-button>` : ''}
+        </ha-icon-button>` : ''}
     `;
   }
 
@@ -108,16 +112,18 @@ class MiniMediaPlayerPowerstrip extends LitElement {
   get renderIdleView() {
     if (this.player.isPaused)
       return html`
-        <paper-icon-button
+        <ha-icon-button
           .icon=${ICON.PLAY[this.player.isPlaying]}
           @click=${e => this.player.playPause(e)}>
-        </paper-icon-button>`;
-    else
+        </ha-icon-button>`;
+    else if (this.showLabel)
       return html`
         <span class='label ellipsis'>
-          ${getLabel(this.hass, 'state.media_player.idle', 'Idle')}
+          ${t(this.hass, 'state.idle', 'state.media_player.idle')}
         </span>
       `;
+    else
+      return html``;
   }
 
   static get styles() {
@@ -138,12 +144,9 @@ class MiniMediaPlayerPowerstrip extends LitElement {
           justify-content: flex-end;
         }
         .group-button {
-          height: calc(var(--mmp-unit) * .85);
-          width: calc(var(--mmp-unit) * .85);
-          min-width: calc(var(--mmp-unit) * .85);
-          margin: 3px;
+          --mdc-icon-size: calc(var(--mmp-unit) * 0.5);
         }
-        paper-icon-button {
+        ha-icon-button {
           min-width: var(--mmp-unit);
         }
       `,

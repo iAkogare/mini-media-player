@@ -23,7 +23,7 @@ const style = css`
         var(--mini-media-player-base-color,
           var(--paper-item-icon-color, #44739e)));
     --mmp-icon-active-color: var(--paper-item-icon-active-color, --mmp-active-color);
-    --mmp-info-opacity: 1;
+    --mmp-info-opacity: 0.75;
     --mmp-bg-opacity: var(--mini-media-player-background-opacity, 1);
     --mmp-artwork-opacity: var(--mini-media-player-artwork-opacity, 1);
     --mmp-progress-height: var(--mini-media-player-progress-height, 6px);
@@ -36,6 +36,7 @@ const style = css`
   ha-card.--bg {
     --mmp-info-opacity: .75;
   }
+  ha-card.--has-artwork[artwork='material'],
   ha-card.--has-artwork[artwork*='cover'] {
     --mmp-accent-color: var(--mini-media-player-overlay-accent-color, var(--mini-media-player-accent-color, var(--accent-color, #f39c12)));
     --mmp-text-color: var(--mmp-overlay-base-color);
@@ -43,12 +44,18 @@ const style = css`
     --mmp-active-color: rgba(255,255,255,.5);
     --mmp-icon-color: var(--mmp-text-color);
     --mmp-icon-active-color: var(--mmp-text-color);
-    --mmp-info-opacity: .75;
-    --paper-slider-container-color: var(--mini-media-player-overlay-color, rgba(255,255,255,.75));
+    --mmp-info-opacity: 0.75;
+    --paper-slider-container-color: var(--mini-media-player-overlay-color, rgba(255,255,255,.75)) !important;
     --mdc-theme-primary: var(--mmp-text-color);
     --mdc-theme-on-primary: var(--mmp-text-color);
     --paper-checkbox-unchecked-color: var(--mmp-text-color);
     --paper-checkbox-label-color: var(--mmp-text-color);
+    --switch-checked-color: var(--mmp-accent-color);
+    --switch-checked-button-color: var(--mmp-accent-color);
+    --switch-checked-track-color: var(--mmp-accent-color);
+    --switch-unchecked-color: var(--mmp-text-color);
+    --switch-unchecked-button-color: var(--mmp-text-color);
+    --switch-unchecked-track-color: var(--mmp-text-color);
     color: var(--mmp-text-color);
   }
   ha-card {
@@ -60,6 +67,8 @@ const style = css`
     position: relative;
     color: inherit;
     font-size: calc(var(--mmp-unit) * 0.35);
+    --mdc-icon-button-size: calc(var(--mmp-unit));
+    --mdc-icon-size: calc(var(--mmp-unit) * 0.6);
   }
   ha-card.--group {
     box-shadow: none;
@@ -77,6 +86,8 @@ const style = css`
     width: 100%;
     position: absolute;
     pointer-events: none;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   ha-card:before {
     content: '';
@@ -103,7 +114,7 @@ const style = css`
     padding-top: 100%;
   }
   .mmp__bg {
-    background: var(--ha-card-background, var(--paper-card-background-color, white));
+    background: var(--ha-card-background, var(--card-background-color, var(--paper-card-background-color, white)));
     position: absolute;
     top: 0; right: 0; bottom: 0; left: 0;
     overflow: hidden;
@@ -111,12 +122,39 @@ const style = css`
     transform: translateZ(0);
     opacity: var(--mmp-bg-opacity);
   }
+  ha-card[artwork='material'].--has-artwork .mmp__bg,
   ha-card[artwork*='cover'].--has-artwork .mmp__bg {
     opacity: var(--mmp-artwork-opacity);
     background: transparent;
   }
+  ha-card[artwork='material'].--has-artwork .cover {
+    height: 100%;
+    right: 0;
+    left: unset;
+    animation: fade-in 4s cubic-bezier(.21,.61,.35,1) !important;
+  }
+  ha-card[artwork='material'].--has-artwork .cover.--prev {
+    animation: fade-in 1s linear reverse forwards !important;
+  }
+  ha-card[artwork='material'].--has-artwork .cover-gradient {
+    position: absolute;
+    height: 100%;
+    right: 0;
+    left: 0;
+    opacity: 1;
+  }
   ha-card.--group .mmp__bg {
     background: transparent;
+  }
+  ha-card.--inactive .cover {
+    opacity: 0;
+  }
+  ha-card.--inactive .cover.--bg {
+    opacity: 1;
+  }
+  .cover-gradient {
+    transition: opacity .45s linear;
+    opacity: 0;
   }
   .cover,
   .cover:before {
@@ -124,8 +162,12 @@ const style = css`
     opacity: 0;
     position: absolute;
     top: 0; right: 0; bottom: 0; left: 0;
-    transition: opacity .75s cubic-bezier(.21,.61,.35,1);
+    transition: opacity .75s linear, width .05s cubic-bezier(.21,.61,.35,1);
     will-change: opacity;
+  }
+  .cover:before {
+    content: '';
+    background: var(--mmp-overlay-color);
   }
   .cover {
     animation: fade-in .5s cubic-bezier(.21,.61,.35,1);
@@ -135,9 +177,11 @@ const style = css`
     border-radius: var(--ha-card-border-radius, 0);
     overflow: hidden;
   }
-  .cover:before {
-    background: var(--mmp-overlay-color);
-    content: '';
+  .cover.--prev {
+    animation: fade-in .5s linear reverse forwards;
+  }
+  .cover.--bg {
+    opacity: 1;
   }
   ha-card[artwork*='full-cover'].--has-artwork .mmp-player {
     background: linear-gradient(to top, var(--mmp-overlay-color) var(--mmp-overlay-color-stop), transparent 100%);
@@ -145,8 +189,7 @@ const style = css`
     border-bottom-right-radius: var(--ha-card-border-radius, 0);
   }
   ha-card.--has-artwork .cover,
-  ha-card.--has-artwork[artwork='cover'] .cover:before,
-  ha-card.--bg .cover {
+  ha-card.--has-artwork[artwork='cover'] .cover:before {
     opacity: .999;
   }
   ha-card[artwork='default'] .cover {
@@ -154,6 +197,9 @@ const style = css`
   }
   ha-card.--bg .cover {
     display: block;
+  }
+  ha-card[artwork='material'].--has-artwork .cover {
+    background-size: cover;
   }
   ha-card[artwork='full-cover-fit'].--has-artwork .cover {
     background-color: black;
@@ -379,6 +425,16 @@ const style = css`
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+  ha-switch {
+    padding: 16px 6px;
+  }
+  .side-by-side {
+    display: flex;
+  }
+  .side-by-side > * {
+    flex: 1;
+    padding-right: 4px;
   }
 `;
 
