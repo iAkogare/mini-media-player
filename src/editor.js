@@ -1,6 +1,7 @@
-import { LitElement, html } from 'lit-element';
+import { LitElement, html, css } from 'lit-element';
 import style from './style';
-import defaultConfig from './utils/config';
+import generateConfig from './config/config';
+import './components/dropdown';
 
 const fireEvent = (node, type, detail = {}, options = {}) => {
   const event = new Event(type, {
@@ -14,39 +15,49 @@ const fireEvent = (node, type, detail = {}, options = {}) => {
   return event;
 };
 
-const OptionsArtwork = [
-  'cover',
-  'full-cover',
-  'material',
-  'cover-fit',
-  'none',
-];
+const OptionsArtwork = ['cover', 'full-cover', 'material', 'cover-fit', 'none'];
 
-const OptionsSource = [
-  'icon',
-  'full',
-];
+const OptionsSource = ['icon', 'full'];
 
-const OptionsSoundMode = [
-  'icon',
-  'full',
-];
+const OptionsSoundMode = ['icon', 'full'];
 
-const OptionsInfo = [
-  'short',
-  'scroll',
-];
+const OptionsInfo = ['short', 'scroll'];
 
-const OptionsReplaceMute = [
-  'play_pause',
-  'stop',
-  'play_stop',
-  'next',
-];
+const OptionsReplaceMute = ['play_pause', 'stop', 'play_stop', 'next'];
+
+const computeItems = (options, optional = false) => {
+  const items = options.map((option) => ({
+    name: option,
+    id: option,
+  }));
+
+  if (optional) {
+    items.push({ name: 'Default', id: undefined });
+  }
+
+  return items;
+};
 
 export default class MiniMediaPlayerEditor extends LitElement {
   static get styles() {
-    return style;
+    return [
+      style,
+      css`
+        .editor-side-by-side {
+          display: flex;
+          margin: 16px 0;
+        }
+        .editor-side-by-side > * {
+          flex: 1;
+          padding-right: 4px;
+        }
+        .editor-label {
+          margin-left: 6px;
+          font-size: 0.8em;
+          opacity: 0.75;
+        }
+      `,
+    ];
   }
 
   static get properties() {
@@ -54,11 +65,11 @@ export default class MiniMediaPlayerEditor extends LitElement {
   }
 
   setConfig(config) {
-    this._config = Object.assign({}, defaultConfig, config);
+    this._config = Object.assign({}, generateConfig, config);
   }
 
   get getMediaPlayerEntities() {
-    return Object.keys(this.hass.states).filter(eid => eid.substr(0, eid.indexOf('.')) === 'media_player');
+    return Object.keys(this.hass.states).filter((eid) => eid.substr(0, eid.indexOf('.')) === 'media_player');
   }
 
   get _group() {
@@ -78,24 +89,25 @@ export default class MiniMediaPlayerEditor extends LitElement {
   render() {
     if (!this.hass) return html``;
 
-    return html`
-      <div class='card-config'>
-        <div class='overall-config'>
-  
-          <paper-dropdown-menu
-            label="Entity (required)"
-            .configValue="${'entity'}"
-            @value-changed=${this.valueChanged}
-            >
-            <paper-listbox
-              slot="dropdown-content" 
-              .selected="${this.getMediaPlayerEntities.indexOf(this._config.entity)}"
-            >
-              ${this.getMediaPlayerEntities.map(entity => html`<paper-item>${entity}</paper-item>`)}
-            </paper-listbox>
-          </paper-dropdown-menu>
+    const mediaPlayerOptions = this.getMediaPlayerEntities.map((entity) => ({
+      name: entity,
+      id: entity,
+    }));
 
-          <div class="side-by-side">
+    return html`
+      <div class="card-config">
+        <div class="overall-config">
+          <span class="editor-label">Entity (required)</span>
+          <mmp-dropdown
+            class="mmp-shortcuts__dropdown"
+            @change=${({ detail }) => this.valueChanged({ target: { configValue: 'entity', value: detail.id } })}
+            .items=${mediaPlayerOptions}
+            .label=${'Select entity'}
+            .selected=${this._config.entity}
+          >
+          </mmp-dropdown>
+
+          <div class="editor-side-by-side">
             <paper-input
               label="Name"
               .value="${this._config.name}"
@@ -109,15 +121,18 @@ export default class MiniMediaPlayerEditor extends LitElement {
               .configValue="${'icon'}"
               @value-changed=${this.valueChanged}
             ></paper-input>
+
+            <paper-input
+              label="Icon Image"
+              .value="${this._config.icon_image}"
+              .configValue="${'icon_image'}"
+              @value-changed=${this.valueChanged}
+            ></paper-input>
           </div>
 
-          <div class="side-by-side">
+          <div class="editor-side-by-side">
             <ha-formfield label="Group cards">
-              <ha-switch
-                .checked=${this._group}
-                .configValue="${'group'}"
-                @change=${this.valueChanged}
-              ></ha-switch>
+              <ha-switch .checked=${this._group} .configValue="${'group'}" @change=${this.valueChanged}></ha-switch>
             </ha-formfield>
 
             <ha-formfield label="Swap volume slider for buttons">
@@ -136,82 +151,72 @@ export default class MiniMediaPlayerEditor extends LitElement {
               ></ha-switch>
             </ha-formfield>
           </div>
-          
-          <div class="side-by-side">
-            <paper-dropdown-menu
-              label="Artwork"
-              .configValue=${'artwork'}
-              @value-changed=${this.valueChanged}
-              class="dropdown"
-              >
-              <paper-listbox
-                slot="dropdown-content"
-                .selected=${(Object.values(OptionsArtwork).indexOf(this._config.artwork))}
-              >
-                ${(Object.values(OptionsArtwork)).map(item => html` <paper-item>${item}</paper-item> `)}
-              </paper-listbox>
-            </paper-dropdown-menu>
 
-            <paper-dropdown-menu
-              label="Source"
-              .configValue=${'source'}
-              @value-changed=${this.valueChanged}
-              class="dropdown"
+          <div class="editor-side-by-side">
+            <div>
+              <span class="editor-label">Artwork</span>
+              <mmp-dropdown
+                class="mmp-shortcuts__dropdown"
+                @change=${({ detail }) => this.valueChanged({ target: { configValue: 'artwork', value: detail.id } })}
+                .items=${computeItems(OptionsArtwork, true)}
+                .label=${'Default'}
+                .selected=${this._config.artwork}
               >
-              <paper-listbox
-                slot="dropdown-content"
-                .selected=${(Object.values(OptionsSource).indexOf(this._config.source))}
+              </mmp-dropdown>
+            </div>
+            <div>
+              <span class="editor-label">Source</span>
+              <mmp-dropdown
+                class="mmp-shortcuts__dropdown"
+                @change=${({ detail }) => this.valueChanged({ target: { configValue: 'source', value: detail.id } })}
+                .items=${computeItems(OptionsSource, true)}
+                .label=${'Default'}
+                .selected=${this._config.source}
               >
-                ${(Object.values(OptionsSource)).map(item => html` <paper-item>${item}</paper-item> `)}
-              </paper-listbox>
-            </paper-dropdown-menu>
-
-            <paper-dropdown-menu
-              label="Sound Mode"
-              .configValue=${'sound_mode'}
-              @value-changed=${this.valueChanged}
-              class="dropdown"
+              </mmp-dropdown>
+            </div>
+            <div>
+              <span class="editor-label">Sound mode</span>
+              <mmp-dropdown
+                class="mmp-shortcuts__dropdown"
+                @change=${({ detail }) =>
+                  this.valueChanged({ target: { configValue: 'sound_mode', value: detail.id } })}
+                .items=${computeItems(OptionsSoundMode, true)}
+                .label=${'Default'}
+                .selected=${this._config.sound_mode}
               >
-              <paper-listbox
-                slot="dropdown-content"
-                .selected=${(Object.values(OptionsSoundMode).indexOf(this._config.sound_mode))}
-              >
-                ${(Object.values(OptionsSoundMode)).map(item => html` <paper-item>${item}</paper-item> `)}
-              </paper-listbox>
-            </paper-dropdown-menu>
+              </mmp-dropdown>
+            </div>
           </div>
 
-          <div class="side-by-side">
-            <paper-dropdown-menu
-              label="Info"
-              .configValue=${'info'}
-              @value-changed=${this.valueChanged}
-              class="dropdown"
+          <div class="editor-side-by-side">
+            <div>
+              <span class="editor-label">Info</span>
+              <mmp-dropdown
+                class="mmp-shortcuts__dropdown"
+                @change=${({ detail }) => this.valueChanged({ target: { configValue: 'info', value: detail.id } })}
+                .items=${computeItems(OptionsInfo, true)}
+                .label=${'Default'}
+                .selected=${this._config.info}
               >
-              <paper-listbox
-                slot="dropdown-content"
-                .selected=${(Object.values(OptionsInfo).indexOf(this._config.info))}
-              >
-                ${(Object.values(OptionsInfo)).map(item => html` <paper-item>${item}</paper-item> `)}
-              </paper-listbox>
-            </paper-dropdown-menu>
+              </mmp-dropdown>
+            </div>
 
-            <paper-dropdown-menu
-              label="Replace Mute"
-              .configValue=${'replace_mute'}
-              @value-changed=${this.valueChanged}
-              class="dropdown"
+            <div>
+              <span class="editor-label">Replace Mute</span>
+              <mmp-dropdown
+                class="mmp-shortcuts__dropdown"
+                @change=${({ detail }) =>
+                  this.valueChanged({ target: { configValue: 'replace_mute', value: detail.id } })}
+                .items=${computeItems(OptionsReplaceMute, true)}
+                .label=${'Default'}
+                .selected=${this._config.replace_mute}
               >
-              <paper-listbox
-                slot="dropdown-content"
-                .selected=${(Object.values(OptionsReplaceMute).indexOf(this._config.replace_mute))}
-              >
-                ${(Object.values(OptionsReplaceMute)).map(item => html` <paper-item>${item}</paper-item> `)}
-              </paper-listbox>
-            </paper-dropdown-menu>
+              </mmp-dropdown>
+            </div>
           </div>
 
-          <div class="side-by-side">
+          <div class="editor-side-by-side">
             <paper-input
               label="Volume Step (1-100)"
               .value="${this._config.volume_step}"
@@ -234,8 +239,7 @@ export default class MiniMediaPlayerEditor extends LitElement {
             ></paper-input>
           </div>
 
-          <div class="side-by-side">
-
+          <div class="editor-side-by-side">
             <paper-input
               label="Background"
               .value="${this._config.background}"
@@ -252,9 +256,9 @@ export default class MiniMediaPlayerEditor extends LitElement {
           </div>
 
           <div>
-            Settings for Tap actions, TTS, hiding UI elements, idle view, speaker groups and shortcuts can only be configured in the code editor
+            Settings for Tap actions, TTS, hiding UI elements, idle view, speaker groups and shortcuts can only be
+            configured in the code editor
           </div>
-
         </div>
       </div>
     `;
@@ -281,3 +285,5 @@ export default class MiniMediaPlayerEditor extends LitElement {
     fireEvent(this, 'config-changed', { config: this._config });
   }
 }
+
+customElements.define('mini-media-player-editor', MiniMediaPlayerEditor);

@@ -9,7 +9,7 @@ const style = css`
     --mmp-name-font-weight: var(--mini-media-player-name-font-weight, 400);
     --mmp-accent-color: var(--mini-media-player-accent-color, var(--accent-color, #f39c12));
     --mmp-base-color: var(--mini-media-player-base-color, var(--primary-text-color, #000));
-    --mmp-overlay-color: var(--mini-media-player-overlay-color, rgba(0,0,0,0.5));
+    --mmp-overlay-color: var(--mini-media-player-overlay-color, rgba(0, 0, 0, 0.5));
     --mmp-overlay-color-stop: var(--mini-media-player-overlay-color-stop, 25%);
     --mmp-overlay-base-color: var(--mini-media-player-overlay-base-color, #fff);
     --mmp-overlay-accent-color: var(--mini-media-player-overlay-accent-color, --mmp-accent-color);
@@ -17,16 +17,17 @@ const style = css`
     --mmp-media-cover-info-color: var(--mini-media-player-media-cover-info-color, --mmp-text-color);
     --mmp-text-color-inverted: var(--disabled-text-color);
     --mmp-active-color: var(--mmp-accent-color);
-    --mmp-button-color: var(--mini-media-player-button-color, rgba(255,255,255,0.25));
-    --mmp-icon-color:
-      var(--mini-media-player-icon-color,
-        var(--mini-media-player-base-color,
-          var(--paper-item-icon-color, #44739e)));
+    --mmp-button-color: var(--mini-media-player-button-color, rgba(255, 255, 255, 0.25));
+    --mmp-icon-color: var(
+      --mini-media-player-icon-color,
+      var(--mini-media-player-base-color, var(--paper-item-icon-color, #44739e))
+    );
     --mmp-icon-active-color: var(--paper-item-icon-active-color, --mmp-active-color);
     --mmp-info-opacity: 0.75;
     --mmp-bg-opacity: var(--mini-media-player-background-opacity, 1);
     --mmp-artwork-opacity: var(--mini-media-player-artwork-opacity, 1);
     --mmp-progress-height: var(--mini-media-player-progress-height, 6px);
+    --mmp-border-radius: var(--ha-card-border-radius, 12px);
     --mdc-theme-primary: var(--mmp-text-color);
     --mdc-theme-on-primary: var(--mmp-text-color);
     --paper-checkbox-unchecked-color: var(--mmp-text-color);
@@ -34,18 +35,21 @@ const style = css`
     color: var(--mmp-text-color);
   }
   ha-card.--bg {
-    --mmp-info-opacity: .75;
+    --mmp-info-opacity: 0.75;
   }
   ha-card.--has-artwork[artwork='material'],
   ha-card.--has-artwork[artwork*='cover'] {
-    --mmp-accent-color: var(--mini-media-player-overlay-accent-color, var(--mini-media-player-accent-color, var(--accent-color, #f39c12)));
+    --mmp-accent-color: var(
+      --mini-media-player-overlay-accent-color,
+      var(--mini-media-player-accent-color, var(--accent-color, #f39c12))
+    );
     --mmp-text-color: var(--mmp-overlay-base-color);
     --mmp-text-color-inverted: #000;
-    --mmp-active-color: rgba(255,255,255,.5);
+    --mmp-active-color: rgba(255, 255, 255, 0.5);
     --mmp-icon-color: var(--mmp-text-color);
     --mmp-icon-active-color: var(--mmp-text-color);
     --mmp-info-opacity: 0.75;
-    --paper-slider-container-color: var(--mini-media-player-overlay-color, rgba(255,255,255,.75)) !important;
+    --paper-slider-container-color: var(--mini-media-player-overlay-color, rgba(255, 255, 255, 0.75)) !important;
     --mdc-theme-primary: var(--mmp-text-color);
     --mdc-theme-on-primary: var(--mmp-text-color);
     --paper-checkbox-unchecked-color: var(--mmp-text-color);
@@ -56,6 +60,13 @@ const style = css`
     --switch-unchecked-color: var(--mmp-text-color);
     --switch-unchecked-button-color: var(--mmp-text-color);
     --switch-unchecked-track-color: var(--mmp-text-color);
+    --mdc-text-field-fill-color: transparent;
+    --mdc-text-field-ink-color: var(--mmp-text-color);
+    --mdc-text-field-idle-line-color: var(--mmp-text-color);
+    --mdc-text-field-label-ink-color: var(--mmp-text-color);
+    --mdc-text-field-hover-line-color: var(--mmp-text-color);
+    --mdc-ripple-color: var(--mmp-text-color);
+    --text-field-padding: 0;
     color: var(--mmp-text-color);
   }
   ha-card {
@@ -72,13 +83,17 @@ const style = css`
   }
   ha-card.--group {
     box-shadow: none;
+    border: none;
     --mmp-progress-height: var(--mini-media-player-progress-height, 4px);
+    --mmp-border-radius: 0px
   }
   ha-card.--more-info {
     cursor: pointer;
   }
-  .mmp__bg, .mmp-player, .mmp__container {
-    border-radius: var(--ha-card-border-radius, 0);
+  .mmp__bg,
+  .mmp-player,
+  .mmp__container {
+    border-radius: var(--mmp-border-radius);
   }
   .mmp__container {
     overflow: hidden;
@@ -92,12 +107,12 @@ const style = css`
   ha-card:before {
     content: '';
     padding-top: 0px;
-    transition: padding-top .5s cubic-bezier(.21,.61,.35,1);
+    transition: padding-top 0.5s cubic-bezier(0.21, 0.61, 0.35, 1);
     will-change: padding-top;
   }
   ha-card.--initial .entity__artwork,
   ha-card.--initial .entity__icon {
-    animation-duration: .001s;
+    animation-duration: 0.001s;
   }
   ha-card.--initial:before,
   ha-card.--initial .mmp-player {
@@ -116,7 +131,10 @@ const style = css`
   .mmp__bg {
     background: var(--ha-card-background, var(--card-background-color, var(--paper-card-background-color, white)));
     position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     overflow: hidden;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
@@ -131,7 +149,7 @@ const style = css`
     height: 100%;
     right: 0;
     left: unset;
-    animation: fade-in 4s cubic-bezier(.21,.61,.35,1) !important;
+    animation: fade-in 4s cubic-bezier(0.21, 0.61, 0.35, 1) !important;
   }
   ha-card[artwork='material'].--has-artwork .cover.--prev {
     animation: fade-in 1s linear reverse forwards !important;
@@ -153,7 +171,7 @@ const style = css`
     opacity: 1;
   }
   .cover-gradient {
-    transition: opacity .45s linear;
+    transition: opacity 0.45s linear;
     opacity: 0;
   }
   .cover,
@@ -161,8 +179,11 @@ const style = css`
     display: block;
     opacity: 0;
     position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    transition: opacity .75s linear, width .05s cubic-bezier(.21,.61,.35,1);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transition: opacity 0.75s linear, width 0.05s cubic-bezier(0.21, 0.61, 0.35, 1);
     will-change: opacity;
   }
   .cover:before {
@@ -170,27 +191,25 @@ const style = css`
     background: var(--mmp-overlay-color);
   }
   .cover {
-    animation: fade-in .5s cubic-bezier(.21,.61,.35,1);
+    animation: fade-in 0.5s cubic-bezier(0.21, 0.61, 0.35, 1);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
-    border-radius: var(--ha-card-border-radius, 0);
+    border-radius: var(--mmp-border-radius, 0);
     overflow: hidden;
   }
   .cover.--prev {
-    animation: fade-in .5s linear reverse forwards;
+    animation: fade-in 0.5s linear reverse forwards;
   }
   .cover.--bg {
     opacity: 1;
   }
   ha-card[artwork*='full-cover'].--has-artwork .mmp-player {
     background: linear-gradient(to top, var(--mmp-overlay-color) var(--mmp-overlay-color-stop), transparent 100%);
-    border-bottom-left-radius: var(--ha-card-border-radius, 0);
-    border-bottom-right-radius: var(--ha-card-border-radius, 0);
   }
   ha-card.--has-artwork .cover,
   ha-card.--has-artwork[artwork='cover'] .cover:before {
-    opacity: .999;
+    opacity: 0.999;
   }
   ha-card[artwork='default'] .cover {
     display: none;
@@ -210,7 +229,7 @@ const style = css`
     box-sizing: border-box;
     position: relative;
     padding: 16px;
-    transition: padding .25s ease-out;
+    transition: padding 0.25s ease-out;
     width: 100%;
     will-change: padding;
   }
@@ -249,8 +268,9 @@ const style = css`
   .entity__icon[color] {
     color: var(--mmp-icon-active-color);
   }
-  .entity__artwork, .entity__icon {
-    animation: fade-in .25s ease-out;
+  .entity__artwork,
+  .entity__icon {
+    animation: fade-in 0.25s ease-out;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -263,7 +283,7 @@ const style = css`
     position: relative;
     text-align: center;
     will-change: border-color;
-    transition: border-color .25s ease-out;
+    transition: border-color 0.25s ease-out;
   }
   ha-card.--rtl .entity__artwork,
   ha-card.--rtl .entity__icon {
@@ -294,7 +314,7 @@ const style = css`
     max-height: 6em;
     word-break: break-word;
     opacity: var(--mmp-info-opacity);
-    transition: color .5s;
+    transition: color 0.5s;
   }
   .entity__info__media[short] {
     max-height: calc(var(--mmp-unit) / 2);
@@ -310,7 +330,7 @@ const style = css`
   .mmp-player__core[inactive] .entity__info__media {
     color: var(--mmp-text-color);
     max-width: 200px;
-    opacity: .5;
+    opacity: 0.5;
   }
   .entity__info__media[short-scroll] {
     max-height: calc(var(--mmp-unit) / 2);
@@ -416,25 +436,28 @@ const style = css`
     display: none;
   }
   @keyframes slide {
-    100% { transform: translateX(-100%); }
+    100% {
+      transform: translateX(-100%);
+    }
   }
   @keyframes move {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
   }
   @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
   ha-switch {
     padding: 16px 6px;
-  }
-  .side-by-side {
-    display: flex;
-  }
-  .side-by-side > * {
-    flex: 1;
-    padding-right: 4px;
   }
 `;
 

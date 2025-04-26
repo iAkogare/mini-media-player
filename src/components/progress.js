@@ -2,12 +2,14 @@ import { LitElement, html, css } from 'lit-element';
 import { classMap } from 'lit-html/directives/class-map';
 
 import convertProgress from '../utils/getProgress';
+import {styleMap} from 'lit-html/directives/style-map';
 
 class MiniMediaPlayerProgress extends LitElement {
   static get properties() {
     return {
       _player: {},
       showTime: Boolean,
+      showRemainingTime: Boolean,
       progress: Number,
       duration: Number,
       tracker: {},
@@ -63,16 +65,25 @@ class MiniMediaPlayerProgress extends LitElement {
         ?paused=${!this.player.isPlaying}>
         ${this.showTime ? html`
           <div class='mmp-progress__duration'>
-            <span>${(convertProgress(this.seekProgress || this.progress))}</span>
-            <span>${(convertProgress(this.duration))}</span>
+            <span>${convertProgress(this.seekProgress || this.progress)}</span>
+            <div>
+              ${this.showTime ? html`
+                <span class='mmp-progress__duration__remaining'>
+                  -${(convertProgress(this.duration - (this.seekProgress || this.progress)))} |
+                </span>
+              ` : ''}
+              <span>${convertProgress(this.duration)}</span>
+            </div>
           </div>
         ` : ''}
-        <paper-progress class=${this.classes}
-          value=${this.seekProgress || this.progress}
-          max=${this.duration}>
-        </paper-progress>
+        <div class='progress-bar' style=${this.progressBarStyle()}></div>
       </div>
     `;
+  }
+   progressBarStyle() {
+    return styleMap({
+      width: `${((this.seekProgress || this.progress) / this.duration) * 100}%`
+    });
   }
 
   trackProgress() {
@@ -140,6 +151,15 @@ class MiniMediaPlayerProgress extends LitElement {
         pointer-events: auto;
         min-height: calc(var(--mmp-progress-height) + 10px);
       }
+      .mmp-progress:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: var(--mmp-progress-height);
+        background-color: rgba(100,100,100,.15);
+      }
       .mmp-progress__duration {
         left: calc(var(--ha-card-border-radius, 4px) / 2);
         right: calc(var(--ha-card-border-radius, 4px) / 2);
@@ -151,27 +171,24 @@ class MiniMediaPlayerProgress extends LitElement {
         padding: 0 6px;
         z-index: 2
       }
-      paper-progress {
+      .mmp-progress__duration__remaining {
+        opacity: .5;
+      }
+      .progress-bar {
         height: var(--mmp-progress-height);
-        --paper-progress-height: var(--mmp-progress-height);
         bottom: 0;
         position: absolute;
-        width: 100%;
+        width: 0;
         transition: height 0;
         z-index: 1;
-        --paper-progress-active-color: var(--mmp-accent-color);
-        --paper-progress-container-color: rgba(100,100,100,.15);
-        --paper-progress-transition-duration: 1s;
-        --paper-progress-transition-timing-function: linear;
-        --paper-progress-transition-delay: 0s;
+        background-color: var(--mmp-accent-color);
       }
-      paper-progress.seeking {
+      .progress-bar.seeking {
         transition: height .15s ease-out;
         height: calc(var(--mmp-progress-height) + 4px);
-        --paper-progress-height: calc(var(--mmp-progress-height) + 4px);
       }
-      .mmp-progress[paused] paper-progress {
-        --paper-progress-active-color: var(--disabled-text-color, rgba(150,150,150,.5));
+      .mmp-progress[paused] .progress-bar {
+        background-color: var(--disabled-text-color, rgba(150,150,150,.5));
       }
     `;
   }
